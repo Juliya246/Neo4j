@@ -1,0 +1,67 @@
+MERGE (a:BusStop{name:' ТРЦ "Фабрика"'})-[:BUS_8 {distance: 200}]->(a0:BusStop{name:'пл. Дубинды'})-[:BUS_8 {distance: 100}]->(a1:BusStop{name:'ул. Иллюши Кулика'})-
+[:BUS_8 {distance: 200}]->(a2:BusStop{name:'ул. Мира'})-[:BUS_8 {distance: 100}]->(a3:BusStop{name:'Cупермаркет "Фреш"'})-[:BUS_8 {distance: 150}]->
+(a4:BusStop{name:'ул. Черноморская'})-[:BUS_8 {distance: 100}]->(:BusStop{name:'Хлебозавод'})-[:BUS_8 {distance: 150}]->(:BusStop{name:' ул. Киевская'})-
+[:BUS_8 {distance: 100}]->(:BusStop{name:' Завод им. Петровского'})-[:BUS_8 {distance: 200}]->(a5:BusStop{name:'Жилмассив'})-[:BUS_8 {distance: 150}]->(a6:BusStop{name:' Областная больница'})-
+[:BUS_8 {distance: 250}]->(a7:BusStop{name:' ЦУМ'})-[:BUS_8 {distance: 250}]->(a8:BusStop{name:' ул. Суворова'})-[:BUS_8 {distance: 100}]->(a9:BusStop{name:'ул. Воронцовская'})-
+[:BUS_8 {distance: 100}]->(a10:BusStop{name:'ул. Театральная'})-[:BUS_8 {distance: 200}]->(a11:BusStop{name:'пл. Корабельная'})-[:BUS_8 {distance: 150}]->(:BusStop{name:'Судостроительный завод'})-
+[:BUS_8 {distance: 200}]->(:BusStop{name:'  м/н Остров'})->
+ 
+(a)-[:BUS_35 {distance: 200}]->(a0)-[:BUS_35 {distance: 100}]->(a1)-
+[:BUS_35 {distance: 200}]->(a2)-[:BUS_35 {distance: 100}]->(a3)-[:BUS_35 {distance: 150}]->(:BusStop{name:'ул. Иллюши Кулика'})-[:BUS_35 {distance: 150}]->
+(a4)-[:BUS_35 {distance: 100}]->(:BusStop{name:' Завод им. Петровского'})-[:BUS_35 {distance: 150}]->(:BusStop{name:' Железнодорожный вокзал'})-
+[:BUS_35 {distance: 100}]->(:BusStop{name:' ул. Железнодорожная'})-[:BUS_8 {distance: 200}]->(a5)-[:BUS_8 {distance: 200}]->(a6)-[:BUS_8 {distance: 150}]->(a7)-[:BUS_35 {distance: 250}]->
+(a8)-[:BUS_35 {distance: 100}]->(a9)-
+[:BUS_35 {distance: 100}]->(a10)-[:BUS_35 {distance: 200}]->(a11)-[:BUS_35 {distance: 150}]->(:BusStop{name:'Судостроительный завод'})-
+[:BUS_35 {distance: 200}]->(:BusStop{name:'  м/н Остров'})->
+
+(a)-[:BUS_49 {distance: 200}]->(a0:BusStop{name:'пл. Дубинды'})-[:BUS_49 {distance: 100}]->(:BusStop{name:'ХБК'})-
+[:BUS_49 {distance: 200}]->(:BusStop{name:'Троллейбусное управление'})-[:BUS_49 {distance: 100}]->(:BusStop{name:' Поликлиника ХБК'})-[:BUS_49 {distance: 100}]->
+(:BusStop{name:'ул. Мира'})-[:BUS_49 {distance: 100}]->(:BusStop{name:'Спутник'})-[:BUS_49 {distance: 150}]->(:BusStop{name:' ул. Черноморская'})-
+[:BUS_49 {distance: 250}]->(:BusStop{name:' Херсонский государственный университет'})-[:BUS_49 {distance: 200}]->(:BusStop{name:'Парк Херсонская крепость'})-[:BUS_49 {distance: 150}]->
+(a8:BusStop{name:'ул. Суворова'})-[:BUS_49 {distance: 250}]->(a11:BusStop{name:' пл. Корабельная'})
+
+MATCH p = (begin)-[:BUS_8 *0..100]->(finish)
+WHERE begin.name = 'ТРЦ "Фабрика"' AND finish.name = 'ЦУМ'
+RETURN length(p)
+
+import neo4j from 'neo4j-driver';
+
+const dbAuth = neo4j.auth.basic('neo4j', 'k');
+const dbConnection = neo4j.driver('bolt://localhost:7687', dbAuth, { disableLosslessIntegers: true });
+
+const runQuery = async (query) => {
+    const session = dbConnection.session();
+    const dbResult = await session.run(query).finally(() => session.close);
+    if (!dbResult.records[0]) {
+        return 'Хода нет';
+    }
+    const result = dbResult.records[0].get(0);
+    return result;
+}
+
+const main = async () => {
+    const bus8 = await runQuery(`
+        MATCH p = (begin)-[:BUS_8 *0..100]->(finish)
+        WHERE begin.name = 'ТРЦ "Фабрика"' AND finish.name = 'ЦУМ'
+        RETURN length(p)
+    `);
+    console.log('Количество остановок для автобуса 8 - ', bus8)
+
+    const bus35 = await runQuery(`
+        MATCH p = (begin)-[:BUS_35 *0..100]->(finish)
+        WHERE begin.name = 'ТРЦ "Фабрика"' AND finish.name = 'пл. Корабельная'
+        RETURN length(p)
+    `);
+    console.log('Количество остановок для автобуса 35 - ', bus35)
+
+    const bus49 = await runQuery(`
+        MATCH p = (begin)-[:BUS_49 *0..100]->(finish)
+        WHERE begin.name = 'ТРЦ "Фабрика"' AND finish.name = 'пл. Корабельная'
+        RETURN length(p)
+    `);
+    console.log('Количество остановок для автобуса 49 - ', bus49)
+
+    dbConnection.close()
+}
+
+main();
