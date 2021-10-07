@@ -33,7 +33,7 @@ const runQuery = async (query) => {
     const session = dbConnection.session();
     const dbResult = await session.run(query).finally(() => session.close);
     if (!dbResult.records[0]) {
-        return 'Хода нет';
+        return 'ERROR! NULL RESULT';
     }
     const result = dbResult.records[0].get(0);
     return result;
