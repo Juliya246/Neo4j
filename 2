@@ -17,28 +17,28 @@ const runQuery = async (query) => {
 }
 
 const main = async () => {
-    const bus29 = await runQuery(`
-        MATCH (A:BusStop{name:'пл. Свободи'}), (B:BusStop{name:'ТРЦ "Фабрика"'})
-        MATCH (A)-[r:BUS_29 *1..100]->(B)
-        RETURN min(reduce(totalDist = 0, n IN r | totalDist + n.dis))
-    `);
-    console.log('Расстояние на автобусе №29 -', bus29)
-
-    const bus35 = await runQuery(`
-        MATCH (A:BusStop{name:'пл. Свободи'}), (B:BusStop{name:'ТРЦ "Фабрика"'})
-        MATCH (A)-[r:BUS_35 *1..100]->(B)
-        RETURN min(reduce(totalDist = 0, n IN r | totalDist + n.dis))
-    `);
-    console.log('Расстояние на автобусе №35 -', bus35)
-
     const bus8 = await runQuery(`
-        MATCH (A:BusStop{name:'пл. Свободи'}), (B:BusStop{name:'ТРЦ "Фабрика"'})
+        MATCH (A:BusStop{name:'ТРЦ "Фабрика"'}), (B:BusStop{name:'ЦУМ'})
         MATCH (A)-[r:BUS_8 *1..100]->(B)
         RETURN min(reduce(totalDist = 0, n IN r | totalDist + n.dis))
     `);
     console.log('Расстояние на автобусе №8 -', bus8)
 
-    const buses = [{ message: '29', val: bus29 }, { message: '35', val: bus35 }, { message: '8', val: bus8 }].filter(item => item.val != 'Хода нет')
+    const bus35 = await runQuery(`
+        MATCH (A:BusStop{name:'ТРЦ "Фабрика"'}), (B:BusStop{name:'пл. Корабельная'})
+        MATCH (A)-[r:BUS_35 *1..100]->(B)
+        RETURN min(reduce(totalDist = 0, n IN r | totalDist + n.dis))
+    `);
+    console.log('Расстояние на автобусе №35 -', bus35)
+
+    const bus49 = await runQuery(`
+        MATCH (A:BusStop{name:'ТРЦ "Фабрика"'}), (B:BusStop{name:'пл. Корабельная'})
+        MATCH (A)-[r:BUS_49 *1..100]->(B)
+        RETURN min(reduce(totalDist = 0, n IN r | totalDist + n.dis))
+    `);
+    console.log('Расстояние на автобусе №49 -', bus49)
+
+    const buses = [{ message: '8', val: bus8 }, { message: '35', val: bus35 }, { message: '49', val: bus49 }].filter(item => item.val != 'Хода нет')
     const minDis = buses.reduce((acc, val) => acc.val > val.val ? val : acc)
     console.log('Лучший выбор: автобус №', minDis.message)
 
